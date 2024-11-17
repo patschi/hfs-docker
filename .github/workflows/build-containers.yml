@@ -37,10 +37,13 @@ jobs:
     strategy:
       matrix:
         include: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    permissions:
+      contents: read
+      packages: write
     name: HFS ${{ matrix.name }}
     steps:
     - name: 📂 Checkout Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: 🧐 Check if Image Exists in GitHub Container Registry
       id: check-image
