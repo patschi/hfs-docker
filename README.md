@@ -52,8 +52,8 @@ services:
       - /opt/hfs-config/:/app/config/ # All config, SSL keys, plugins will be saved there. Needed to have settings persisted.
       - /mnt/your-data:/data # This mount local /mnt/your-data/ to /data inside the container. Configure HFS to check /data then.
     environment:
-      - HFS_PORT=8080 # Change default port from 80 to 8080
-      - HFS_CREATE_ADMIN=Password123 # This will create the admin user with pre-defined password
+      - HFS_PORT=8080 # Change default port from 80 to 8080.
+      - HFS_CREATE_ADMIN=Password123 # This will create the admin user with pre-defined password.
     ports:
       - 8080:8080
 ```
