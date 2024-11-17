@@ -109,8 +109,8 @@ jobs:
       if: ${{ env.skip_build == 'false' }}
       run: |
         echo 'Checking if expected output present to succeed test...'
-        docker logs hfs-container | grep -i "serving on"
-      
+        docker logs hfs-container 2>&1 | grep -i "serving on http"
+
     # Clean up the container after the test
     - name: 🧹 Clean up the container
       if: ${{ env.skip_build == 'false' }}
