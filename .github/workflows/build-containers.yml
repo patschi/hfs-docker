@@ -1,0 +1,87 @@
+name: 🚀 Build Containers
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      latest: ${{ steps.set-latest.outputs.latest }}
+    steps:
+    - name: 🔄 Fetch Release Data from GitHub API
+      id: fetch-json
+      run: |
+        curl -s "https://api.github.com/repos/rejetto/hfs/releases?per_page=10" -o releases.json
+
+    - name: 🧩 Parse JSON and Generate Build Matrix
+      id: set-matrix
+      run: |
+        matrix=$(jq -cr '[.[] | select(.draft == false) | {name: .tag_name, prerelease: .prerelease, download: (.assets[] | select(.name | test("hfs-linux.*zip")).browser_download_url)}]' releases.json)
+        echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+    - name: 🕵️ Find Latest Stable
+      id: set-latest
+      run: |
+        latest=$(jq -cr '[.[] | select(.prerelease == false and .draft == false)][0] | {name: .tag_name, download: (.assets[] | select(.name | test("hfs-linux.*zip")).browser_download_url)}' releases.json)
+        echo "latest=$latest" >> $GITHUB_OUTPUT
+
+  build-all:
+    needs: generate-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    steps:
+    - name: 📂 Checkout Code
+      uses: actions/checkout@v3
+
+    - name: 🧐 Check if Image Exists in GitHub Container Registry
+      id: check-image
+      run: |
+        IMAGE="ghcr.io/${{ github.repository }}:${{ matrix.name }}"
+        echo "Checking if image $IMAGE exists in GitHub Container Registry..."
+
+        # Check if image exists using GitHub Container Registry API
+        response=$(curl -s -o /dev/null -w "%{http_code}" \
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          "https://ghcr.io/v2/${{ github.repository }}/manifests/${{ matrix.name }}")
+        
+        if [ "$response" -eq 200 ]; then
+          echo "Image $IMAGE already exists, skipping build."
+          echo "skip_build=true" >> $GITHUB_ENV
+        else
+          echo "Image $IMAGE not found, proceeding with build."
+          echo "skip_build=false" >> $GITHUB_ENV
+        fi
+
+    - name: 🛠️ Build Container Image
+      if: ${{ env.skip_build == 'false' }}
+      run: |
+        echo "Building container for ${matrix.name} (prerelease: ${{ matrix.prerelease }})..."
+        docker build --build-arg DOWNLOAD_URL=${{ matrix.download }} -t -t "ghcr.io/${{ github.repository }}:${{ matrix.name }}" -f Dockerfile .
+
+    - name: 📤 Push Container Image to GitHub Container Registry
+      if: ${{ env.skip_build == 'false' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "$GITHUB_TOKEN" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        docker push "ghcr.io/${{ github.repository }}:${{ matrix.name }}"
+
+    - name: 🕵️ Parse Latest Entry
+      id: parse-latest
+      run: |
+        echo "${{ needs.generate-matrix.outputs.latest }}" > latest.json
+        echo "latest_name=$(jq -r '.name' latest.json)" >> $GITHUB_ENV
+
+    - name: 🔄 Re-tag and Push the 'latest' Image
+      if: ${{ env.skip_build == 'false' && matrix.name == env.latest_name }}
+      run: |
+        echo "Re-tagging the image to 'latest' for ${{ env.latest_name }}"
+        docker tag "ghcr.io/${{ github.repository }}:${{ needs.generate-matrix.outputs.latest }}" "ghcr.io/${{ github.repository }}:latest"
+        docker push "ghcr.io/${{ github.repository }}:latest"
