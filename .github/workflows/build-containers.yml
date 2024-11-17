@@ -15,11 +15,12 @@ jobs:
       latest: ${{ steps.set-latest.outputs.latest }}
     name: Preparing builds
     steps:
-    # Get all releases from GitHub API from the HFS project (last 10 items)
+    # Get all releases from GitHub API from the HFS project (last x items)
     - name: 🔄 Fetch Release Data from GitHub API
       id: fetch-json
       run: |
-        curl -s "https://api.github.com/repos/rejetto/hfs/releases?per_page=10" -o releases.json
+        LAST_RELEASES=3
+        curl -s "https://api.github.com/repos/rejetto/hfs/releases?per_page=$LAST_RELEASES" -o releases.json
 
     # Parse the above JSON and save it for later parsing
     - name: 🧩 Parse JSON and Generate Build Matrix
@@ -40,6 +41,7 @@ jobs:
     needs: generate-matrix
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     permissions:
