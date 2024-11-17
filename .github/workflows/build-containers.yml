@@ -42,8 +42,6 @@ jobs:
       packages: write
     name: HFS ${{ matrix.name }}
     steps:
-    - name: 📂 Checkout Code
-      uses: actions/checkout@v4
 
     - name: 🧐 Check if Image Exists in GitHub Container Registry
       id: check-image
@@ -62,6 +60,9 @@ jobs:
           echo "Image %{{ matrix.name }} not found, proceeding with build."
           echo "skip_build=false" >> $GITHUB_ENV
         fi
+
+    - name: 📂 Checkout Code
+      uses: actions/checkout@v4
 
     - name: 🛠️ Build Container Image
       if: ${{ env.skip_build == 'false' }}
