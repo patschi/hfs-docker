@@ -36,6 +36,7 @@ jobs:
     strategy:
       matrix:
         include: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    name: HFS ${{ matrix.name }}
     steps:
     - name: 📂 Checkout Code
       uses: actions/checkout@v3
@@ -62,7 +63,8 @@ jobs:
     - name: 🛠️ Build Container Image
       if: ${{ env.skip_build == 'false' }}
       run: |
-        echo "Building container for ${matrix.name} (prerelease: ${{ matrix.prerelease }})..."
+        echo "Building container for ${{ matrix.name }}..."
+        echo "- Prerelease state is ${{ matrix.prerelease }}"
         docker build --build-arg DOWNLOAD_URL=${{ matrix.download }} -t -t "ghcr.io/${{ github.repository }}:${{ matrix.name }}" -f Dockerfile .
 
     - name: 📤 Push Container Image to GitHub Container Registry
