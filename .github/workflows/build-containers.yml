@@ -46,7 +46,7 @@ jobs:
     - name: 🧐 Check if Image Exists in GitHub Container Registry
       id: check-image
       run: |
-        echo "Checking if image %{{ matrix.name }} exists in GitHub Container Registry..."
+        echo "Checking if image ${{ matrix.name }} exists in GitHub Container Registry..."
 
         # Check if image exists using GitHub Container Registry API
         response=$(curl -s -o /dev/null -X GET -w "%{http_code}" \
@@ -54,10 +54,10 @@ jobs:
           "https://ghcr.io/v2/${{ github.repository }}/manifests/${{ matrix.name }}")
         
         if [ "$response" -eq 200 ]; then
-          echo "Image %{{ matrix.name }} already exists, skipping build."
+          echo "Image ${{ matrix.name }} already exists, skipping build."
           echo "skip_build=true" >> $GITHUB_ENV
         else
-          echo "Image %{{ matrix.name }} not found, proceeding with build."
+          echo "Image ${{ matrix.name }} not found, proceeding with build."
           echo "skip_build=false" >> $GITHUB_ENV
         fi
 
@@ -71,10 +71,10 @@ jobs:
         echo "Prerelease state is ${{ matrix.prerelease }}"
         docker build --build-arg DOWNLOAD_URL=${{ matrix.download }} \
           --label 'org.opencontainers.image.source=https://github.com/patschi/hfs-docker' \
-          --label 'org.opencontainers.image.version="%{{ matrix.name }}"' \
+          --label 'org.opencontainers.image.version="${{ matrix.name }}"' \
           --label 'org.opencontainers.image.created=$(date --rfc-3339=seconds)' \
-          --label 'org.opencontainers.image.title="HFS %{{ matrix.name }}"' \
-          --label 'org.opencontainers.image.description="Includes HFS version %{{ matrix.name }} from https://github.com/rejetto/hfs"' \
+          --label 'org.opencontainers.image.title="HFS ${{ matrix.name }}"' \
+          --label 'org.opencontainers.image.description="Includes HFS version ${{ matrix.name }} from https://github.com/rejetto/hfs"' \
           --label 'org.opencontainers.image.licenses=MIT' \
           -t "ghcr.io/${{ github.repository }}:${{ matrix.name }}" -f Dockerfile .
 
