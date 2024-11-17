@@ -69,12 +69,13 @@ jobs:
       run: |
         echo "Building container for ${{ matrix.name }}..."
         echo "Prerelease state is ${{ matrix.prerelease }}"
+        build_date=$(date --rfc-3339=seconds)
         docker build --build-arg DOWNLOAD_URL=${{ matrix.download }} \
           --label 'org.opencontainers.image.source=https://github.com/patschi/hfs-docker' \
-          --label 'org.opencontainers.image.version="${{ matrix.name }}"' \
-          --label 'org.opencontainers.image.created=$(date --rfc-3339=seconds)' \
-          --label 'org.opencontainers.image.title="HFS ${{ matrix.name }}"' \
-          --label 'org.opencontainers.image.description="Includes HFS version ${{ matrix.name }} from https://github.com/rejetto/hfs"' \
+          --label 'org.opencontainers.image.version=${{ matrix.name }}' \
+          --label 'org.opencontainers.image.created='$build_date'' \
+          --label 'org.opencontainers.image.title=HFS ${{ matrix.name }}' \
+          --label 'org.opencontainers.image.description=Includes HFS version ${{ matrix.name }} from https://github.com/rejetto/hfs' \
           --label 'org.opencontainers.image.licenses=MIT' \
           -t "ghcr.io/${{ github.repository }}:${{ matrix.name }}" -f Dockerfile .
 
