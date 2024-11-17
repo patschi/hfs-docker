@@ -48,19 +48,18 @@ jobs:
     - name: 🧐 Check if Image Exists in GitHub Container Registry
       id: check-image
       run: |
-        IMAGE="ghcr.io/${{ github.repository }}:${{ matrix.name }}"
-        echo "Checking if image $IMAGE exists in GitHub Container Registry..."
+        echo "Checking if image %{{ matrix.name }} exists in GitHub Container Registry..."
 
         # Check if image exists using GitHub Container Registry API
-        response=$(curl -s -o /dev/null -w "%{http_code}" \
-          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+        response=$(curl -s -o /dev/null -X GET -w "%{http_code}" \
+          -H "Authorization: Bearer $(echo -n ${{ secrets.GITHUB_TOKEN }} | base64 -w 0)" \
           "https://ghcr.io/v2/${{ github.repository }}/manifests/${{ matrix.name }}")
         
         if [ "$response" -eq 200 ]; then
-          echo "Image $IMAGE already exists, skipping build."
+          echo "Image %{{ matrix.name }} already exists, skipping build."
           echo "skip_build=true" >> $GITHUB_ENV
         else
-          echo "Image $IMAGE not found, proceeding with build."
+          echo "Image %{{ matrix.name }} not found, proceeding with build."
           echo "skip_build=false" >> $GITHUB_ENV
         fi
 
