@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Generate jobs dynamically
   generate-matrix:
     runs-on: ubuntu-latest
     outputs:
@@ -14,17 +15,20 @@ jobs:
       latest: ${{ steps.set-latest.outputs.latest }}
     name: Preparing builds
     steps:
+    # Get all releases from GitHub API from the HFS project (last 10 items)
     - name: 🔄 Fetch Release Data from GitHub API
       id: fetch-json
       run: |
         curl -s "https://api.github.com/repos/rejetto/hfs/releases?per_page=10" -o releases.json
 
+    # Parse the above JSON and save it for later parsing
     - name: 🧩 Parse JSON and Generate Build Matrix
       id: set-matrix
       run: |
         matrix=$(jq -cr '[.[] | select(.draft == false) | {name: .tag_name, prerelease: .prerelease, download: (.assets[] | select(.name | test("hfs-linux.*zip")).browser_download_url)}]' releases.json)
         echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
+    # Check for the latest stable release (tagged for :latest)
     - name: 🕵️ Find Latest Stable
       id: set-latest
       run: |
@@ -32,6 +36,7 @@ jobs:
         echo "latest=$latest" >> $GITHUB_OUTPUT
 
   build-all:
+    # Build all versions
     needs: generate-matrix
     runs-on: ubuntu-latest
     strategy:
@@ -43,6 +48,7 @@ jobs:
     name: HFS ${{ matrix.name }}
     steps:
 
+    # Check if image already exists in registry. To prevent unneeded work.
     - name: 🧐 Check if Image Exists in GitHub Container Registry
       id: check-image
       run: |
@@ -61,9 +67,11 @@ jobs:
           echo "skip_build=false" >> $GITHUB_ENV
         fi
 
+    # Checkout the code from git repository
     - name: 📂 Checkout Code
       uses: actions/checkout@v4
 
+    # Build the container with LABELs for specific version
     - name: 🛠️ Build Container Image
       if: ${{ env.skip_build == 'false' }}
       run: |
@@ -87,12 +95,14 @@ jobs:
         echo "$GITHUB_TOKEN" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
         docker push "ghcr.io/${{ github.repository }}:${{ matrix.name }}"
 
+    # Parse what the latest version is
     - name: 🕵️ Parse Latest Entry
       id: parse-latest
       run: |
         echo '${{ needs.generate-matrix.outputs.latest }}' > latest.json
         echo "latest_name=$(jq -r '.name' latest.json)" >> $GITHUB_ENV
 
+    # If the current built version is the latest, we also tag it as latest
     - name: 🔄 Re-tag and Push the 'latest' Image
       if: ${{ env.skip_build == 'false' && matrix.name == env.latest_name }}
       run: |

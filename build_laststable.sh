@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
+
+# !! THIS SCRIPT IS ONLY NEEDED IF YOU WANT TO BUILD THE 
+# !! LATEST HFS STABLE CONTAINER YOURSELF.
 # Quick script to manually build the latest HFS stable container yourself.
-# Otherwise, the image from https:
+# Otherwise, the pre-built container images are available here:
+# https://github.com/users/patschi/packages/container/package/hfs-docker
 
 cd "$(dirname "$0")"
 
