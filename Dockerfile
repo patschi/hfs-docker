@@ -7,7 +7,8 @@ RUN apk add --update --no-cache curl zip jq && \
     unzip hfs.zip && \
     chmod +x hfs && \
     rm -f hfs.zip && \
-    rm -rf plugins
+    rm -rf plugins && \
+    mkdir -p /app/config/
 
 # Prepare container only to copy over required libraries
 FROM gcr.io/distroless/nodejs22-debian12:nonroot AS deps
@@ -32,8 +33,11 @@ COPY --from=deps \
     /lib/x86_64-linux-gnu/ld-linux-x86-64.so* \
     /lib/x86_64-linux-gnu/
 COPY --from=deps /lib64/ld-linux-x86-64.so* /lib64/
+# Copy empty config folder as older HFS versions need it to start
+# (workaround as distroless does not have mkdir to create folders)
+COPY --from=build --chown=nonroot:nonroot /app/config/ /app/config/
 # Copy HFS binary with non-root privileges (allowing auto-update)
-COPY --from=build --chown=65532:65532 /app/hfs /app
+COPY --from=build --chown=nonroot:nonroot /app/hfs /app
 
 EXPOSE 80/tcp
 EXPOSE 443/tcp
