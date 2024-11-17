@@ -88,6 +88,6 @@ jobs:
     - name: 🔄 Re-tag and Push the 'latest' Image
       if: ${{ env.skip_build == 'false' && matrix.name == env.latest_name }}
       run: |
-        echo "Re-tagging the image to 'latest' for ${{ env.latest_name }}"
-        docker tag "ghcr.io/${{ github.repository }}:${{ needs.generate-matrix.outputs.latest }}" "ghcr.io/${{ github.repository }}:latest"
+        echo "Re-tagging the image to 'latest' for version ${{ env.latest_name }}"
+        docker tag "ghcr.io/${{ github.repository }}:${{ env.latest_name }}" "ghcr.io/${{ github.repository }}:latest"
         docker push "ghcr.io/${{ github.repository }}:latest"
