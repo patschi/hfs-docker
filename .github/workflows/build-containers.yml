@@ -24,7 +24,7 @@ jobs:
     - name: 🔄 Fetch Release Data from GitHub API
       id: fetch-json
       run: |
-        LAST_RELEASES=3
+        LAST_RELEASES=10
         curl -s "https://api.github.com/repos/rejetto/hfs/releases?per_page=$LAST_RELEASES" -o releases.json
 
     # Parse the above JSON and save it for later parsing
