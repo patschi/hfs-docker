@@ -69,7 +69,14 @@ jobs:
       run: |
         echo "Building container for ${{ matrix.name }}..."
         echo "Prerelease state is ${{ matrix.prerelease }}"
-        docker build --build-arg DOWNLOAD_URL=${{ matrix.download }} -t "ghcr.io/${{ github.repository }}:${{ matrix.name }}" -f Dockerfile .
+        docker build --build-arg DOWNLOAD_URL=${{ matrix.download }} \
+          --label 'org.opencontainers.image.source=https://github.com/patschi/hfs-docker' \
+          --label 'org.opencontainers.image.version="%{{ matrix.name }}"' \
+          --label 'org.opencontainers.image.created=$(date --rfc-3339=seconds)' \
+          --label 'org.opencontainers.image.title="HFS %{{ matrix.name }}"' \
+          --label 'org.opencontainers.image.description="Includes HFS version %{{ matrix.name }} from https://github.com/rejetto/hfs"' \
+          --label 'org.opencontainers.image.licenses=MIT' \
+          -t "ghcr.io/${{ github.repository }}:${{ matrix.name }}" -f Dockerfile .
 
     - name: 📤 Push Container Image to GitHub Container Registry
       if: ${{ env.skip_build == 'false' }}
