@@ -12,6 +12,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       latest: ${{ steps.set-latest.outputs.latest }}
+    name: Preparing builds
     steps:
     - name: 🔄 Fetch Release Data from GitHub API
       id: fetch-json
@@ -64,8 +65,8 @@ jobs:
       if: ${{ env.skip_build == 'false' }}
       run: |
         echo "Building container for ${{ matrix.name }}..."
-        echo "- Prerelease state is ${{ matrix.prerelease }}"
-        docker build --build-arg DOWNLOAD_URL=${{ matrix.download }} -t -t "ghcr.io/${{ github.repository }}:${{ matrix.name }}" -f Dockerfile .
+        echo "Prerelease state is ${{ matrix.prerelease }}"
+        docker build --build-arg DOWNLOAD_URL=${{ matrix.download }} -t "ghcr.io/${{ github.repository }}:${{ matrix.name }}" -f Dockerfile .
 
     - name: 📤 Push Container Image to GitHub Container Registry
       if: ${{ env.skip_build == 'false' }}
