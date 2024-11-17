@@ -1,10 +1,15 @@
 name: 🚀 Build Containers
 
 on:
-  push:
+  push: # on pushes
     branches:
       - master
-  workflow_dispatch:
+    paths:
+      - 'Dockerfile'
+      - '.github/workflows/**'
+  schedule:
+    - cron: '0 10 * * 1' # every Monday at 10am UTC
+  workflow_dispatch: # allow manual start
 
 jobs:
   # Generate jobs dynamically
@@ -95,6 +100,7 @@ jobs:
       id: run_container
       if: ${{ env.skip_build == 'false' }}
       run: |
+        echo 'Starting test container with image which was built right now...'
         docker run --pull=never -d --name hfs-container ghcr.io/${{ github.repository }}:${{ matrix.name }}
         sleep 3
 
@@ -102,12 +108,14 @@ jobs:
     - name: 🔍 Check container logs
       if: ${{ env.skip_build == 'false' }}
       run: |
-        docker logs hfs-container | grep -qi "serving on"
+        echo 'Checking if expected output present to succeed test...'
+        docker logs hfs-container | grep -i "serving on"
       
     # Clean up the container after the test
     - name: 🧹 Clean up the container
       if: ${{ env.skip_build == 'false' }}
       run: |
+        echo 'Deleting test container...'
         docker rm -f hfs-container
 
     # Push the image to the container registry
