@@ -35,6 +35,7 @@ COPY --from=deps \
 COPY --from=deps /lib64/ld-linux-x86-64.so* /lib64/
 # Copy empty config folder as older HFS versions need it to start
 # (workaround as distroless does not have mkdir to create folders)
+# user nonroot = UID 65532, GID 65532
 COPY --from=build --chown=nonroot:nonroot /app/config/ /app/config/
 # Copy HFS binary with non-root privileges (allowing auto-update)
 COPY --from=build --chown=nonroot:nonroot /app/hfs /app
