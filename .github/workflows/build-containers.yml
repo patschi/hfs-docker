@@ -82,7 +82,7 @@ jobs:
     - name: 🕵️ Parse Latest Entry
       id: parse-latest
       run: |
-        echo "${{ needs.generate-matrix.outputs.latest }}" > latest.json
+        echo '${{ needs.generate-matrix.outputs.latest }}' > latest.json
         echo "latest_name=$(jq -r '.name' latest.json)" >> $GITHUB_ENV
 
     - name: 🔄 Re-tag and Push the 'latest' Image
