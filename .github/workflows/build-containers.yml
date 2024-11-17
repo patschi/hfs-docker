@@ -95,7 +95,7 @@ jobs:
       id: run_container
       if: ${{ env.skip_build == 'false' }}
       run: |
-        docker run --pull=never -d --name hfs-container ghcr.io/patschi/hfs-docker:${{ matrix.version }}
+        docker run --pull=never -d --name hfs-container ghcr.io/${{ github.repository }}:${{ matrix.name }}
         sleep 3
 
     # Check the container logs for "serving on" to verify it's running correctly
