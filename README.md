@@ -6,7 +6,7 @@ Docker images for the HFS project **are built automatically here** using schedul
 
 ## Key Features
 
-- **Automated Builds**: Docker images are **automatically built** (_on a schedule, not immediately_) when a new release is published on the HFS-GitHub repository. This includes stable and pre-releases. The `latest` tag does always refer to the latest stable release.
+- **Automated Builds**: Docker images are **automatically built** (_on a schedule, not immediately_) when a new release is published on the HFS-GitHub repository. This includes stable and pre-releases. The `latest` tag does always refer to the latest stable release. Builds are automatically tested if they start before publishing.
 - **Distroless Base Images**: Images are kept minimal, small in size, secure, and free from unnecessary packages or shells.
 - **Security**: Distroless images do not provide package managers, shells or any other unnecessary tools. This reduces any attack vectors.
 - **Rootless**: The container runs **rootless** (UID 65532), and the HFS application also runs without root privileges for additional security.

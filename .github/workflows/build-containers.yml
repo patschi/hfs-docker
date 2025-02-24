@@ -33,6 +33,7 @@ jobs:
       run: |
         matrix=$(jq -cr '[.[] | select(.draft == false) | {name: .tag_name, prerelease: .prerelease, download: (.assets[] | select(.name | test("hfs-linux.*zip")).browser_download_url)}]' releases.json)
         echo "matrix=$matrix" >> $GITHUB_OUTPUT
+        echo $matrix
 
     # Check for the latest stable release (tagged for :latest)
     - name: 🕵️ Find Latest Stable
@@ -40,6 +41,7 @@ jobs:
       run: |
         latest=$(jq -cr '[.[] | select(.prerelease == false and .draft == false)][0] | {name: .tag_name, download: (.assets[] | select(.name | test("hfs-linux.*zip")).browser_download_url)}' releases.json)
         echo "latest=$latest" >> $GITHUB_OUTPUT
+        echo $latest
 
   build-all:
     # Build all versions
