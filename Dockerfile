@@ -40,6 +40,10 @@ COPY --from=build --chown=nonroot:nonroot /app/config/ /app/config/
 # Copy HFS binary with non-root privileges (allowing auto-update)
 COPY --from=build --chown=nonroot:nonroot /app/hfs /app
 
+# Disable Update in-app, supported in 0.56.0+
+ENV DISABLE_UPDATE=1
+
+# Expose default ports
 EXPOSE 80/tcp
 EXPOSE 443/tcp
 
