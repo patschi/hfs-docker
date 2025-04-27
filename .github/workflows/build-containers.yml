@@ -8,7 +8,7 @@ on:
       - 'Dockerfile'
       - '.github/workflows/**'
   schedule:
-    - cron: '0 10 * * 1' # every Monday at 10am UTC
+    - cron: '0 10 * * *' # every day at 10am UTC
   workflow_dispatch: # allow manual start
 
 jobs:
