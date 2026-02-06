@@ -31,7 +31,7 @@ jobs:
     - name: 🧩 Parse JSON and Generate Build Matrix
       id: set-matrix
       run: |
-        matrix=$(jq -cr '[.[] | select(.draft == false) | {name: .tag_name, prerelease: .prerelease, download: (.assets[] | select(.name | test("hfs-linux-x64-*.zip")).browser_download_url)}]' releases.json)
+        matrix=$(jq -cr '[.[] | select(.draft == false) | {name: .tag_name, prerelease: .prerelease, download: (.assets[] | select(.name | test("hfs-linux-x64-.*zip")).browser_download_url)}]' releases.json)
         echo "matrix=$matrix" >> $GITHUB_OUTPUT
         echo $matrix
 
@@ -39,7 +39,7 @@ jobs:
     - name: 🕵️ Find Latest Stable
       id: set-latest
       run: |
-        latest=$(jq -cr '[.[] | select(.prerelease == false and .draft == false)][0] | {name: .tag_name, download: (.assets[] | select(.name | test("hfs-linux-x64-*.zip")).browser_download_url)}' releases.json)
+        latest=$(jq -cr '[.[] | select(.prerelease == false and .draft == false)][0] | {name: .tag_name, download: (.assets[] | select(.name | test("hfs-linux-x64-.*zip")).browser_download_url)}' releases.json)
         echo "latest=$latest" >> $GITHUB_OUTPUT
         echo $latest
 
